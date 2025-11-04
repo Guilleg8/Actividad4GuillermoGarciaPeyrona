@@ -1,0 +1,6 @@
+jsonlogging
+fastapi
+uvicorn[standard]
+prometheus-client
+python-json-logger
+fastapi-cors

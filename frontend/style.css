@@ -1,0 +1,75 @@
+/* style.css */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: #1a1a2e;
+    color: #e0e0e0;
+    margin: 0;
+    padding: 20px;
+}
+
+header {
+    text-align: center;
+    color: #ffd700;
+    margin-bottom: 30px;
+}
+
+main {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 20px;
+}
+
+.card {
+    background-color: #2a2a4e;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+.card h2 {
+    color: #ffd700;
+    border-bottom: 1px solid #4a4a7c;
+    padding-bottom: 10px;
+}
+
+/* --- Tabla de Auditoría --- */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+th, td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #4a4a7c;
+}
+
+th {
+    background-color: #3a3a6e;
+}
+
+tbody tr:hover {
+    background-color: #3a3a6e;
+}
+
+/* --- Gráfico de Rendimiento --- */
+.chart-container {
+    position: relative;
+    height: 300px;
+}
+
+.metrics-summary {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 15px;
+    font-size: 1.1em;
+}
+
+/* --- Diagrama Mermaid --- */
+.mermaid {
+    background-color: #f0f0f0;
+    border-radius: 5px;
+    padding: 10px;
+    text-align: center;
+}

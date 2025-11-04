@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-M">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Ministerio de Magia</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <h1>🧙‍♂️ Dashboard del Ministerio de Magia</h1>
+    </header>
+
+    <main>
+        <section class="card">
+            <h2>Rendimiento del Sistema (Tiempo Real)</h2>
+            <div class="chart-container">
+                <canvas id="performanceChart"></canvas>
+            </div>
+            <div class="metrics-summary">
+                <p>Latencia Media: <strong id="metric-latency">...</strong> ms</p>
+                <p>Eventos/seg: <strong id="metric-events">...</strong></p>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>Arquitectura Modular del Sistema</h2>
+            <div class="mermaid">
+                graph TD
+                    A[Frontend JS] -->|HTTP (JSON)| B(API - FastAPI)
+
+                    subgraph B [API - FastAPI]
+                        direction LR
+                        B1(Endpoints)
+                        B2(Middleware/AOP)
+                        B3(DI Container)
+                    end
+
+                    B1 --> C{Lógica de Negocio}
+                    B2 -- Aplica --> B1
+
+                    B2 -- Usa --> D[Seguridad (AuthService)]
+                    B2 -- Usa --> E[Auditoría (AuditLogger)]
+
+                    C --> F[Hechizos (Clases)]
+                    C -- Usa --> G[Contenedor IoC (SpellRegistry)]
+                    G --> F
+
+                    E --> H[Logs (Archivos/DB)]
+                    D --> I[Roles/Permisos]
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>Auditoría de Eventos Mágicos</h2>
+            <table id="auditTable">
+                <thead>
+                    <tr>
+                        <th>Tipo de Hechizo</th>
+                        <th>Intentos</th>
+                        <th>Éxitos</th>
+                        <th>Fallos</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    </tbody>
+            </table>
+        </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+
+    <script src="app.js"></script>
+</body>
+</html>
