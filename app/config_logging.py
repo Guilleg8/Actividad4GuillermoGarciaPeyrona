@@ -1,17 +1,21 @@
-# --- (Contenido anterior) ---
+# app/config_logging.py
+
 import logging
 import logging.config
 import sys
 import os
-# ¡NUEVO!
-from jsonlogging import JsonFormatter
+from pathlib import Path  # <-- ¡IMPORTANTE!
 
+# --- Definir la ruta raíz del proyecto ---
+CONFIG_DIR = Path(__file__).resolve().parent
+PROJECT_ROOT = CONFIG_DIR.parent
+LOG_DIR = PROJECT_ROOT / "logs"  # <-- Apuntar a la carpeta 'logs' raíz
 
 
 def setup_logging():
-    """Configura el sistema de logging (modificado para logs JSON)."""
+    """Configura el sistema de logging (JSON deshabilitado)."""
 
-    LOG_DIR = "logs"
+    # LOG_DIR ya está definido arriba
     if not os.path.exists(LOG_DIR):
         os.makedirs(LOG_DIR)
         print(f"Directorio de logs creado en: {LOG_DIR}")
@@ -20,7 +24,6 @@ def setup_logging():
         'version': 1,
         'disable_existing_loggers': False,
 
-        # --- Formateadores (Modificado) ---
         'formatters': {
             'default': {
                 'format': '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -28,14 +31,8 @@ def setup_logging():
             'audit': {
                 'format': 'AUDIT | %(asctime)s | %(message)s',
             },
-            # --- NUEVO FORMATTER ESTRUCTURADO ---
-            'json': {
-                'class': 'jsonlogging.JsonFormatter',
-                'format': '%(asctime)s %(name)s %(levelname)s %(message)s'
-            },
         },
 
-        # --- Handlers (Modificado) ---
         'handlers': {
             'console': {
                 'class': 'logging.StreamHandler',
@@ -45,39 +42,26 @@ def setup_logging():
             'audit_file': {
                 'class': 'logging.handlers.RotatingFileHandler',
                 'formatter': 'audit',
+                # ¡Ruta corregida!
                 'filename': os.path.join(LOG_DIR, 'ministry_audit.log'),
-                'maxBytes': 10485760, 'backupCount': 5,
-            },
-            # --- NUEVO HANDLER ESTRUCTURADO ---
-            'json_file': {
-                'class': 'logging.handlers.RotatingFileHandler',
-                'formatter': 'json',  # Usa el formatter JSON
-                'filename': os.path.join(LOG_DIR, 'app_structured.log.json'),
                 'maxBytes': 10485760, 'backupCount': 5,
             },
         },
 
-        # --- Loggers (Modificado) ---
         'loggers': {
             '': {
-                'handlers': ['console', 'json_file'],  # Log raíz a consola y JSON
+                'handlers': ['console'],
                 'level': 'INFO',
             },
-            'app.main': {
-                'level': 'DEBUG',
-                'propagate': True,
-            },
-            'app.aspects': {
-                'level': 'DEBUG',
-                'propagate': True,
-            },
+            'app.main': {'level': 'DEBUG', 'propagate': True, },
+            'app.aspects': {'level': 'DEBUG', 'propagate': True, },
             'app.audit': {
                 'level': 'INFO',
                 'propagate': False,
-                'handlers': ['audit_file'],  # El log de auditoría va por separado
+                'handlers': ['audit_file'],
             }
         },
     }
 
     logging.config.dictConfig(LOGGING_CONFIG)
-    print("Configuración de Logging cargada (con JSON estructurado).")
+    print("Configuración de Logging cargada (con JSON deshabilitado).")

@@ -1,8 +1,7 @@
 // app.js
 
 // Dirección de nuestra API de FastAPI
-const API_URL = "http://127.0.0.1:8000/api/dashboard-data";
-
+const API_URL = "/api/dashboard-data";
 // --- 1. Inicialización de Mermaid (Diagrama) ---
 // (Mermaid se inicializa automáticamente al cargar la página)
 mermaid.initialize({

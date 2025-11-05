@@ -4,7 +4,7 @@
     <meta charset="UTF-M">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Ministerio de Magia</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
 
@@ -26,12 +26,12 @@
 
         <section class="card">
             <h2>Arquitectura Modular del Sistema</h2>
+
             <div class="mermaid">
                 graph TD
-                    A[Frontend JS] -->|HTTP (JSON)| B(API - FastAPI)
+                    A[Frontend JS] -- HTTP (JSON) --> B[API - FastAPI]
 
-                    subgraph B [API - FastAPI]
-                        direction LR
+                    subgraph B [ ]
                         B1(Endpoints)
                         B2(Middleware/AOP)
                         B3(DI Container)
