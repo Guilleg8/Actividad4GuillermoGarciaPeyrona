@@ -39,7 +39,7 @@ app = FastAPI(
 )
 log = logging.getLogger("app.main")
 
-app.mount("/static", StaticFiles(directory="frontend"), name="static")
+app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
 
 # 2. Crea una ruta para la página principal '/'
 @app.get("/", include_in_schema=False)
@@ -204,21 +204,66 @@ async def spell_not_found_handler(request: Request, exc: SpellNotFoundError):
     log.info(f"Hechizo no encontrado (manejador): {exc}")
     return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"detail": str(exc)})
 
-@app.post("/hechizos/lanzar", status_code=status.HTTP_201_CREATED, summary="Lanza un hechizo (Protegido por AOP)")
+
+@app.post(
+    "/hechizos/lanzar",
+    status_code=status.HTTP_201_CREATED,
+    summary="Lanza un hechizo (Protegido por AOP)"
+)
+# --- APLICACIÓN DE ASPECTOS (AOP) ---
+# Estos decoradores reemplazan el 'if auth...'
 @log_audit(action_name="Lanzar Hechizo")
-@require_permission(permission="spell:cast")
+@require_permission(permission="spell:cast")  # <-- Esto hace la seguridad
 def cast_spell(
-    spell: SpellRequest,
-    current_user: User = Depends(get_current_user),
-    audit: AuditLogger = Depends(get_audit_logger),
-    auth: AuthService = Depends(get_auth_service),
-    spell_registry: SpellRegistry = Depends(get_spell_registry)
+        spell: SpellRequest,
+
+        # Estas dependencias son necesarias para que los
+        # decoradores y la lógica de negocio funcionen
+        current_user: User = Depends(get_current_user),
+        audit: AuditLogger = Depends(get_audit_logger),
+        auth: AuthService = Depends(get_auth_service),
+        spell_registry: SpellRegistry = Depends(get_spell_registry)
 ):
+    """
+    Endpoint para lanzar un hechizo.
+    La lógica de negocio está limpia. La seguridad y la auditoría
+    se gestionan de forma transversal mediante aspectos (decoradores).
+    """
+
+    # --- ¡DEBES BORRAR EL BLOQUE 'if auth.check_permission(...)' DE AQUÍ! ---
+    #
+    # if not auth.check_permission(current_user, required_level):  <-- ¡BORRA ESTO!
+    #     log.warning(...)                                         <-- ¡BORRA ESTO!
+    #     audit.log(...)                                           <-- ¡BORRA ESTO!
+    #     raise HTTPException(...)                                 <-- ¡BORRA ESTO!
+    #
+    # --- FIN DEL BLOQUE A BORRAR ---
+
+    # --- LÓGICA DE NEGOCIO (LIMPIA) ---
+    # El endpoint ahora solo coordina la petición:
+
     log.debug(f"Lógica de endpoint: obteniendo '{spell.spell_name}' del registro.")
+
     hechizo_obj = spell_registry.get_spell(spell.spell_name)
-    result_message = hechizo_obj.execute(user=current_user, incantation=spell.incantation)
+
+    result_message = hechizo_obj.execute(
+        user=current_user,
+        incantation=spell.incantation
+    )
+
     log.debug("Lógica de endpoint: hechizo ejecutado, devolviendo respuesta.")
-    return {"message": result_message, "user": current_user.username}
+
+    return {
+        "message": result_message,
+        "user": current_user.username
+    }
+
+    log.debug("Lógica de endpoint: hechizo ejecutado, devolviendo respuesta.")
+
+    return {
+        "message": result_message,
+        "user": current_user.username
+    }
 
 AUDIT_LOG_FILE = LOGS_DIR / "ministry_audit.log"
 
@@ -258,7 +303,6 @@ def _get_performance_metrics() -> dict:
     return {"current_latency_ms": round(avg_latency * 1000, 2), "events_per_second": events_per_sec}
 
 # --- ¡FIN DE LAS RUTAS DE API! ---
-
 
 # --- ¡SECCIÓN MODIFICADA! ---
 # Montar los archivos estáticos usando la ruta absoluta
