@@ -10,6 +10,7 @@ from app.domain import (
     ExpectoPatronum,
     AvadaKedavra
 )
+from fastapi import Request, Depends, HTTPException, status # <-- ¡Importa Request!
 
 _audit_service_instance = AuditLogger()
 _auth_service_instance = AuthService(roles_map=ROLES_TO_PERMISSIONS)
@@ -23,11 +24,6 @@ def get_auth_service() -> AuthService:
     return _auth_service_instance
 
 
-_auth_service_instance = AuthService(roles_map=ROLES_TO_PERMISSIONS)
-
-def get_auth_service() -> AuthService:
-    """Dependencia: Obtiene el servicio de autenticación."""
-    return _auth_service_instance
 
 # --- (Contenido anterior: AuditLogger, AuthService, get_...) ---
 # from services import AuditLogger, AuthService, SpellRegistry # (Import real)
@@ -60,10 +56,25 @@ def get_spell_registry() -> SpellRegistry:
     """Dependencia: Obtiene el registro de hechizos."""
     return _spell_registry_instance
 
-def get_current_user() -> User:
+
+class NotAuthenticatedError(Exception):
+    """Lanzada cuando el usuario no está autenticado (falta de headers)."""
+    pass
+
+
+# --- ¡VERSIÓN MODIFICADA DE get_current_user! ---
+def get_current_user(request: Request) -> User:
     """
-    Dependencia: Simula la obtención del usuario autenticado.
-    En una app real, esto leería un token (ej. OAuth2).
+    Dependencia: Obtiene el usuario desde los headers HTTP.
+
+    El frontend (JS) es responsable de añadir estos headers
+    leyéndolos desde el localStorage.
     """
-    # Para este ejemplo, simulamos un usuario fijo (Harry).
-    return User(username="harry_potter", level="Auror")
+    username = request.headers.get("X-User-Username")
+    role = request.headers.get("X-User-Role")
+
+    if not username or not role:
+        # Si faltan los headers, el usuario no está "logeado"
+        raise NotAuthenticatedError("No se proporcionaron cabeceras de autenticación.")
+
+    return User(username=username, level=role)

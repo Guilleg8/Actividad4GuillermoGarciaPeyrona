@@ -92,3 +92,7 @@ class AvadaKedavra(Hechizo):
             spell_name="Avada Kedavra",
             username=user.username
         )
+
+class LoginRequest(BaseModel):
+    """El cuerpo (body) esperado para la petición de login."""
+    username: str

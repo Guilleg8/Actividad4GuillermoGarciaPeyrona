@@ -44,7 +44,9 @@ def setup_logging():
                 'formatter': 'audit',
                 # ¡Ruta corregida!
                 'filename': os.path.join(LOG_DIR, 'ministry_audit.log'),
-                'maxBytes': 10485760, 'backupCount': 5,
+                'maxBytes': 10485760,
+                'backupCount': 5,
+                'encoding': 'utf-8',
             },
         },
 
@@ -64,4 +66,4 @@ def setup_logging():
     }
 
     logging.config.dictConfig(LOGGING_CONFIG)
-    print("Configuración de Logging cargada (con JSON deshabilitado).")
+    print("Configuración de Logging cargada.")

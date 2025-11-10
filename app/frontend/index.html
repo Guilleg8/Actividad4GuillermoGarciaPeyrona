@@ -14,6 +14,17 @@
 
     <main>
         <section class="card">
+            <section class="card" id="user-profile-card">
+            <h2>Perfil de Usuario</h2>
+            <p><strong>Usuario:</strong> <span id="user-name">...</span></p>
+            <p><strong>Rol:</strong> <span id="user-role">...</span></p>
+            <p><strong>Permisos Asignados:</strong></p>
+            <ul id="user-permissions">
+                <li>...</li>
+            </ul>
+
+            <button id="logout-button" class="logout-button">Cerrar Sesión</button>
+            </section>
             <h2>Rendimiento del Sistema (Tiempo Real)</h2>
             <div class="chart-container">
                 <canvas id="performanceChart"></canvas>

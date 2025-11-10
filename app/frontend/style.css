@@ -73,3 +73,21 @@ tbody tr:hover {
     padding: 10px;
     text-align: center;
 }
+
+.logout-button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: #e63946; /* Un rojo para "cerrar sesión" */
+    color: #f1faee;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.logout-button:hover {
+    background-color: #c62834;
+}

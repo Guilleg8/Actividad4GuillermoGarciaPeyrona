@@ -1,0 +1,64 @@
+/* app/frontend/login.css */
+
+.login-body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.login-container {
+    width: 100%;
+    max-width: 500px;
+    margin: 20px;
+}
+
+.login-container .card {
+    padding: 30px;
+}
+
+.form-group {
+    margin: 20px 0;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: bold;
+    color: #e0e0e0;
+}
+
+.form-group select {
+    width: 100%;
+    padding: 12px;
+    border-radius: 5px;
+    border: none;
+    font-size: 16px;
+    background-color: #f0f0f0;
+    color: #1a1a2e;
+}
+
+button {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 5px;
+    background-color: #ffd700;
+    color: #1a1a2e;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+button:hover {
+    background-color: #f0c000;
+}
+
+.error-text {
+    color: #e63946; /* Rojo de error */
+    font-weight: bold;
+    margin-top: -10px;
+    margin-bottom: 15px;
+    height: 1.2em; /* Reserva espacio para que no "salte" */
+}

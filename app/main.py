@@ -16,8 +16,10 @@ from app.domain import (
 )
 from app.services import AuditLogger, AuthService, SpellRegistry
 from app.dependencies import (
-    get_current_user, get_audit_logger, get_auth_service, get_spell_registry
+    get_current_user, get_audit_logger, get_auth_service, get_spell_registry, NotAuthenticatedError
 )
+from app.domain import LoginRequest # <-- ¡Importa el nuevo modelo!
+from app.services import USER_DATABASE
 from app.aspects import log_audit, require_permission
 from app.metrics import HTTP_REQUESTS_TOTAL, HTTP_REQUESTS_LATENCY
 from prometheus_client import make_asgi_app
@@ -47,46 +49,66 @@ async def read_index():
     """Sirve el archivo index.html como página principal."""
     return FileResponse("frontend/index.html")
 
-@app.post("/hechizos/lanzar", status_code=status.HTTP_201_CREATED)
+
+# app/main.py
+
+# ... (otros imports, handlers de excepciones, etc.) ...
+
+@app.post(
+    "/hechizos/lanzar",
+    status_code=status.HTTP_201_CREATED,
+    summary="Lanza un hechizo (Protegido por AOP)",
+    operation_id="cast_spell"  # <-- ¡AÑADE ESTA LÍNEA!
+)
+@log_audit(action_name="Lanzar Hechizo")
+@require_permission(permission="spell:cast")  # <-- ESTO HACE LA SEGURIDAD
 def cast_spell(
         spell: SpellRequest,
-
-        # === INYECCIÓN DE DEPENDENCIAS (DI) ===
-        # FastAPI inyecta automáticamente las dependencias aquí.
-        # El endpoint NO sabe cómo se crean, solo los usa.
-
         current_user: User = Depends(get_current_user),
         audit: AuditLogger = Depends(get_audit_logger),
-        auth: AuthService = Depends(get_auth_service)
-    ):
+        auth: AuthService = Depends(get_auth_service),
+        spell_registry: SpellRegistry = Depends(get_spell_registry)
+):
+    """
+    Endpoint para lanzar un hechizo.
+    La lógica de negocio está limpia. La seguridad y la auditoría
+    se gestionan de forma transversal mediante aspectos (decoradores).
+    """
+
+    # ==========================================================
+    # ¡¡¡BORRA ESTE BLOQUE ENTERO!!!
+    # (Tu Traceback dice que la línea 71, que está aquí, sigue existiendo)
+    #
+    # if not auth.check_permission(current_user, required_level):
+    #     log.warning(f"Fallo de seguridad: {current_user.username} no tiene nivel {required_level}")
+    #     audit.log(current_user, "Lanzar Hechizo", {"status": "FALLO_PERMISO", "hechizo": spell.spell_name})
+    #     raise HTTPException(
+    #         status_code=status.HTTP_403_FORBIDDEN,
+    #         detail=f"No tienes el nivel de {required_level} requerido."
+    #     )
+    #
+    # ¡¡¡FIN DEL BLOQUE A BORRAR!!!
+    # ==========================================================
+
+    # --- DEJA ESTA LÓGICA (ESTÁ BIEN) ---
+    log.debug(f"Lógica de endpoint: obteniendo '{spell.spell_name}' del registro.")
+
+    hechizo_obj = spell_registry.get_spell(spell.spell_name)
+
+    result_message = hechizo_obj.execute(
+        user=current_user,
+        incantation=spell.incantation
+    )
+
+    log.debug("Lógica de endpoint: hechizo ejecutado, devolviendo respuesta.")
+
+    return {
+        "message": result_message,
+        "user": current_user.username
+    }
 
 
-        log.debug(f"Usuario '{current_user.username}' intenta lanzar '{spell.spell_name}'")
-
-        # --- Lógica de negocio MEZCLADA con preocupaciones transversales ---
-        # (Esto es lo que mejoraremos con AOP en el siguiente paso)
-
-        # 1. Preocupación: Seguridad (Autorización)
-        required_level = "Auror"
-        if not auth.check_permission(current_user, required_level):
-            log.warning(f"Fallo de seguridad: {current_user.username} no tiene nivel {required_level}")
-            # 2. Preocupación: Auditoría (del fallo)
-            audit.log(current_user, "Lanzar Hechizo", {"status": "FALLO_PERMISO", "hechizo": spell.spell_name})
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail=f"No tienes el nivel de {required_level} requerido."
-            )
-
-        # 3. Lógica de Negocio (El Núcleo)
-        log.info(f"Lanzando hechizo: {spell.incantation}!")
-        # ... (Aquí iría la lógica real de negocio) ...
-
-        audit.log(current_user, "Lanzar Hechizo", {"status": "ÉXITO", "hechizo": spell.spell_name})
-
-        return {
-            "message": f"¡{spell.incantation} lanzado con éxito!",
-            "user": current_user.username
-        }
+# ... (el resto de tu código de main.py)
 
 
 @app.post("/hechizos/lanzar", status_code=status.HTTP_201_CREATED)
@@ -310,6 +332,18 @@ def _get_performance_metrics() -> dict:
 # 1. Monta la carpeta 'frontend' (app/frontend) bajo la ruta '/static'
 app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
 
+@app.exception_handler(NotAuthenticatedError)
+async def not_authenticated_handler(request: Request, exc: NotAuthenticatedError):
+    """
+    Manejador para cuando el usuario intenta acceder a una API
+    sin los headers de autenticación.
+    """
+    log.warning(f"Intento de acceso no autenticado: {exc}")
+    return JSONResponse(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        content={"detail": "No autenticado. Por favor, inicie sesión."},
+    )
+
 # 2. Crea una ruta para la página principal '/'
 @app.get("/", include_in_schema=False)
 async def read_index():
@@ -322,6 +356,66 @@ if __name__ == "__main__":
     log.info("Iniciando servidor Uvicorn en modo desarrollo...")
     uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
     # --- (Contenido anterior: FastAPI, Depends, etc.) ---
-    from fastapi import FastAPI, Depends, HTTPException, status
-    import logging
 
+
+@app.post("/api/login", summary="Valida un usuario y devuelve su rol")
+def api_login(
+        login_data: LoginRequest
+):
+    """
+    Recibe un nombre de usuario, lo busca en la "base de datos"
+    y devuelve el usuario y su rol si se encuentra.
+    """
+    username_lower = login_data.username.lower()  # Insensible a mayúsculas
+
+    # Busca el rol en nuestra "base de datos"
+    role = USER_DATABASE.get(username_lower)
+
+    if not role:
+        # Si el usuario no existe, devuelve un 404
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Nombre de usuario no encontrado en los registros del Ministerio."
+        )
+
+    # Si se encuentra, devuelve los datos
+    return {
+        "username": username_lower,  # Devolvemos el nombre en minúsculas
+        "role": role
+    }
+
+app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
+
+# 2. Crea una ruta para la página de LOGIN '/'
+@app.get("/", include_in_schema=False)
+async def read_index():
+    """Sirve el dashboard principal (index.html)."""
+    return FileResponse(FRONTEND_DIR / "index.html")
+
+# 3. ¡AÑADE LA RUTA PARA EL LOGIN.HTML!
+@app.get("/login", include_in_schema=False)
+async def read_login():
+    """Sirve la página de inicio de sesión."""
+    return FileResponse(FRONTEND_DIR / "login.html")
+
+
+@app.get("/api/user-info", summary="Obtiene la info del usuario actual")
+def get_user_info(
+        # Obtenemos el usuario y el servicio de autenticación
+        current_user: User = Depends(get_current_user),
+        auth: AuthService = Depends(get_auth_service)
+):
+    """
+    Devuelve el nombre de usuario, rol y lista de permisos
+    del usuario actualmente "autenticado".
+    """
+    role = current_user.level
+
+    # Usamos el método de AuthService
+    permissions = auth.get_permissions_for_role(role)
+
+    return {
+        "username": current_user.username,
+        "role": role,
+        "permissions": list(permissions)  # Convertimos el 'set' a 'list' para JSON
+    }

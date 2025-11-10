@@ -20,14 +20,14 @@ class AuthService:
     Servicio de Seguridad.
     Verifica los permisos del usuario.
     """
-    def check_permission(self, user: User, required_level: str) -> bool:
-        # Lógica de permisos (simplificada)
-        levels = {"Funcionario": 1, "Auror": 2, "Ministro": 3}
-        user_lvl = levels.get(user.level, 0)
-        req_lvl = levels.get(required_level, 0)
 
-        return user_lvl >= req_lvl
 
+USER_DATABASE: dict[str, str] = {
+    "harry_potter": "Auror",
+    "percy_weasley": "Funcionario",
+    "hermione_granger": "Ministro",
+    "admin": "Ministro" # Un usuario 'admin' genérico
+}
 
 ROLES_TO_PERMISSIONS: dict[str, set[str]] = {
     "Funcionario": {
@@ -76,10 +76,8 @@ class AuthService:
         """
         Verifica si el rol del usuario tiene asignado el permiso requerido.
         """
-        user_role = user.level  # Usamos 'level' como el 'rol'
+        user_role = user.level
 
-        # Obtenemos los permisos para el rol del usuario.
-        # .get(user_role, set()) devuelve un set vacío si el rol no existe.
         user_permissions = self._roles_map.get(user_role, set())
 
         has_perm = required_permission in user_permissions
@@ -91,8 +89,22 @@ class AuthService:
         )
 
         return has_perm
-# --- (Contenido anterior: logging, AuditLogger, AuthService) ---
-import logging
+
+    def check_permission(self, user: User, required_level: str) -> bool:
+        # Lógica de permisos (simplificada)
+        levels = {"Funcionario": 1, "Auror": 2, "Ministro": 3}
+        user_lvl = levels.get(user.level, 0)
+        req_lvl = levels.get(required_level, 0)
+
+        return user_lvl >= req_lvl
+
+    # --- ¡ESTE ES EL MÉTODO QUE FALTABA! ---
+    def get_permissions_for_role(self, role_name: str) -> set[str]:
+        """
+        Devuelve el conjunto de permisos para un rol específico.
+        """
+        # Devuelve una copia para evitar modificaciones externas
+        return self._roles_map.get(role_name, set()).copy()
 
 
 # from domain import Hechizo  # (Import real)
@@ -104,31 +116,33 @@ import logging
 class SpellRegistry:
     """
     Actúa como un Contenedor IoC y una Factory para los objetos Hechizo.
-
-    Mantiene un registro de clases de hechizos y crea instancias
-    cuando se le solicita.
+    (Versión modificada para ser insensible a mayúsculas/minúsculas)
     """
 
     def __init__(self):
+        # Ahora 'Hechizo' está definido gracias a la importación
         self._spells: dict[str, Type[Hechizo]] = {}
         self._instances: dict[str, Hechizo] = {}
 
     def register(self, name: str, spell_class: Type[Hechizo]):
-        """Registra una *clase* de hechizo."""
-        if name in self._spells:
+        """Registra una *clase* de hechizo (convirtiendo a minúsculas)."""
+        key = name.lower()  # <-- ¡CAMBIO!
+        if key in self._spells:
             raise ValueError(f"El hechizo '{name}' ya está registrado.")
-        self._spells[name] = spell_class
-        print(f"Hechizo '{name}' registrado en el contenedor IoC.")
+
+        self._spells[key] = spell_class
+        print(f"Hechizo '{name}' (clave: {key}) registrado en el contenedor IoC.")
 
     def get_spell(self, name: str) -> Hechizo:
         """
-        Obtiene una *instancia* de un hechizo.
+        Obtiene una *instancia* de un hechizo (buscando en minúsculas).
         Implementa el patrón Factory.
         """
-        spell_class = self._spells.get(name)
+        key = name.lower()  # <-- ¡CAMBIO!
+        spell_class = self._spells.get(key)  # <-- ¡CAMBIO!
+
         if not spell_class:
+            # Ahora 'SpellNotFoundError' está definido
             raise SpellNotFoundError(f"Hechizo '{name}' no encontrado.")
 
-        # Para este ejemplo, creamos una nueva instancia cada vez.
-        # Podríamos implementar un patrón Singleton aquí si fuera necesario.
         return spell_class()
