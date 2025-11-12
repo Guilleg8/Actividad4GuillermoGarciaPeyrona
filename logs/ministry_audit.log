@@ -1,2 +1,4 @@
 AUDIT | 2025-11-06 15:24:58,195 | Usuario: harry_potter | Acción: Lanzar Hechizo | Detalles: {'status': 'INTENTO', 'peticion': "spell_name='Lumus' incantation='Lumus'"}
 AUDIT | 2025-11-06 15:24:58,197 | Usuario: harry_potter | Acción: Lanzar Hechizo | Detalles: {'status': 'FALLO', 'peticion': "spell_name='Lumus' incantation='Lumus'", 'error': "Hechizo 'Lumus' no encontrado."}
+AUDIT | 2025-11-12 12:49:11,107 | Usuario: admin | Acción: Lanzar Hechizo | Detalles: {'status': 'INTENTO', 'peticion': "spell_name='Lumos' incantation='Lumos!'"}
+AUDIT | 2025-11-12 12:49:11,117 | Usuario: admin | Acción: Lanzar Hechizo | Detalles: {'status': 'ÉXITO', 'peticion': "spell_name='Lumos' incantation='Lumos!'"}

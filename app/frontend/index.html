@@ -15,16 +15,16 @@
     <main>
         <section class="card">
             <section class="card" id="user-profile-card">
-            <h2>Perfil de Usuario</h2>
-            <p><strong>Usuario:</strong> <span id="user-name">...</span></p>
-            <p><strong>Rol:</strong> <span id="user-role">...</span></p>
-            <p><strong>Permisos Asignados:</strong></p>
-            <ul id="user-permissions">
-                <li>...</li>
-            </ul>
-
-            <button id="logout-button" class="logout-button">Cerrar Sesión</button>
+                <h2>Perfil de Usuario</h2>
+                <p><strong>Usuario:</strong> <span id="user-name">...</span></p>
+                <p><strong>Rol:</strong> <span id="user-role">...</span></p>
+                <p><strong>Permisos Asignados:</strong></p>
+                <ul id="user-permissions">
+                    <li>...</li>
+                </ul>
+                <button id="logout-button" class="logout-button">Cerrar Sesión</button>
             </section>
+
             <h2>Rendimiento del Sistema (Tiempo Real)</h2>
             <div class="chart-container">
                 <canvas id="performanceChart"></canvas>
@@ -62,7 +62,24 @@
                     D --> I[Roles/Permisos]
             </div>
         </section>
+        <section class="card">
+                <h2>Lanzar Hechizo</h2>
+                <p>Seleccione un hechizo para ejecutar (requiere permiso 'spell:cast').</p>
 
+                <div class="form-group">
+                    <label for="spell-select">Hechizos Registrados:</label>
+                    <select id="spell-select">
+                        <option value="Lumos">Lumos (Permitido)</option>
+                        <option value="Expecto Patronum">Expecto Patronum (Permitido)</option>
+                        <option value="Avada Kedavra">Avada Kedavra (Imperdonable)</option>
+                        <option value="Wingardium Leviosa">Wingardium Leviosa (No registrado)</option>
+                    </select>
+                </div>
+
+                <p id="spell-message" class="spell-message-text"></p>
+
+                <button id="cast-spell-button">¡Lanzar!</button>
+            </section>
         <section class="card">
             <h2>Auditoría de Eventos Mágicos</h2>
             <table id="auditTable">

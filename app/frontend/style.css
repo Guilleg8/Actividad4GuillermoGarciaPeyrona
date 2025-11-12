@@ -91,3 +91,51 @@ tbody tr:hover {
 .logout-button:hover {
     background-color: #c62834;
 }
+
+.form-group {
+    margin: 20px 0;
+}
+.form-group label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+.form-group select {
+    width: 100%;
+    padding: 12px;
+    border-radius: 5px;
+    border: none;
+    font-size: 16px;
+    background-color: #f0f0f0;
+    color: #1a1a2e;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #ffd700;
+    color: #1a1a2e;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+button:hover {
+    background-color: #f0c000;
+}
+
+/* Para los mensajes de éxito/error del hechizo */
+.spell-message-text {
+    font-weight: bold;
+    height: 1.2em;
+    margin-top: 15px;
+}
+.spell-success {
+    color: #00ff99; /* Verde brillante */
+}
+.spell-error {
+    color: #e63946; /* Rojo de error */
+}

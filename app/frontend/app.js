@@ -1,89 +1,74 @@
 // app/frontend/app.js
 
-// --- 1. CONSTANTES ---
+// --- 1. CONSTANTES GLOBALES ---
 const API_URL = "/api/dashboard-data";
 const USER_INFO_URL = "/api/user-info";
 
-// --- 2. FUNCIONES DE AUTENTICACIÓN ---
+// --- 2. DECLARACIÓN DE VARIABLES GLOBALES ---
+let performanceChart;
 
-/**
- * Comprueba si el usuario está "logeado" (en localStorage).
- * Si no, lo redirige a la página de login.
- * Devuelve 'true' si está autenticado, 'false' si no.
- */
+// --- 3. FUNCIONES DE AUTENTICACIÓN ---
+
 function checkAuthentication() {
-    const user = localStorage.getItem('magic_user_username');
+    // ¡IMPORTANTE! Lee los datos de sessionStorage
+    const user = sessionStorage.getItem('magic_user_username');
+
     if (!user) {
-        console.log("Usuario no encontrado, redirigiendo al login...");
-        window.location.href = '/';
+        console.log("checkAuthentication falló: No se encontró usuario. Redirigiendo a /");
+        window.location.href = '/'; // Redirige a la raíz (login)
+        return false;
     }
+    console.log("checkAuthentication OK. Usuario:", user);
     return true;
 }
 
-/**
- * Obtiene los headers de autenticación desde localStorage
- * para enviarlos en CADA petición de la API.
- */
 function getAuthHeaders() {
     return {
-        'X-User-Username': localStorage.getItem('magic_user_username') || '',
-        'X-User-Role': localStorage.getItem('magic_user_role') || ''
+        'X-User-Username': sessionStorage.getItem('magic_user_username') || '',
+        'X-User-Role': sessionStorage.getItem('magic_user_role') || ''
     };
 }
 
-// --- 3. FUNCIONES DE CARGA DE DATOS (CON HEADERS) ---
-
-/**
- * Llama a la API de /api/user-info una sola vez.
- */
-// app/frontend/app.js
+// --- 4. FUNCIONES DE CARGA DE DATOS (FETCH) ---
 
 async function fetchUserInfo() {
-    console.log("Obteniendo info del usuario...");
+    console.log("fetchUserInfo: Obteniendo info del usuario...");
     try {
-        // ... (el 'try' está bien)
         const response = await fetch(USER_INFO_URL, {
             headers: getAuthHeaders()
         });
-        // ... (el resto del 'try' está bien)
+
+        if (response.status === 401) {
+             console.log("fetchUserInfo: Error 401. Redirigiendo a /");
+             window.location.href = '/';
+             return;
+        }
+        if (!response.ok) throw new Error(`Error de red: ${response.statusText}`);
+
         const data = await response.json();
         updateUserInfo(data);
 
     } catch (error) {
         console.error("Error al obtener info del usuario:", error);
-        if (error.message.includes("Failed to fetch")) {
-            console.log("Servidor no responde. Cerrando sesión.");
-            sessionStorage.clear();
-            window.location.href = '/';
-        // --- ¡BLOQUE 'CATCH' CORREGIDO! ---
-        // No reemplazamos todo el HTML, solo actualizamos el texto.
         document.getElementById('user-name').innerText = "Error";
         document.getElementById('user-role').innerText = "Error";
-
         const permissionsList = document.getElementById('user-permissions');
-        permissionsList.innerHTML = ""; // Limpiar "cargando"
-        const li = document.createElement('li');
-        li.textContent = "Error al cargar el perfil.";
-        li.style.color = "#e63946"; // Rojo
-        permissionsList.appendChild(li);
-
-        // ¡Ya NO borramos el botón de "Cerrar Sesión"!
+        permissionsList.innerHTML = "<li>Error al cargar el perfil.</li>";
+        permissionsList.style.color = "#e63946";
     }
 }
 
-/**
- * Función principal para obtener datos de la API (tabla y gráfico).
- */
 async function fetchData() {
-    console.log("Llamando a la API de FastAPI...");
+    console.log("fetchData: Obteniendo datos del dashboard...");
     try {
-        // --- ¡ASEGÚRATE DE QUE ESTA PETICIÓN TAMBIÉN ENVÍA HEADERS! ---
         const response = await fetch(API_URL, {
             headers: getAuthHeaders()
         });
 
         if (response.status === 401) {
-            window.location.href = '/'; // Redirige a la raíz             return;
+             console.log("fetchData: Error 401. Redirigiendo a /");
+             window.location.href = '/';
+             return;
         }
         if (!response.ok) throw new Error(`Error de red: ${response.statusText}`);
 
@@ -95,23 +80,55 @@ async function fetchData() {
         if (error.message.includes("Failed to fetch")) {
             console.log("Servidor no responde. Cerrando sesión.");
             sessionStorage.clear();
-            window.location.href = '/'; // Redirige a la raíz        }
+            window.location.href = '/';
+        }
     }
 }
 
-// --- 4. FUNCIONES DE ACTUALIZACIÓN DE LA UI (PEGAR CÓDIGO FALTANTE) ---
-// (Estas funciones rellenan el HTML)
+async function castSpell() {
+    const spellSelect = document.getElementById('spell-select');
+    const spellName = spellSelect.value;
+    const messageEl = document.getElementById('spell-message');
 
-/**
- * Actualiza la tarjeta de perfil de usuario con los datos de la API.
- */
+    console.log(`Intentando lanzar: ${spellName}`);
+    messageEl.textContent = "Lanzando...";
+    messageEl.className = 'spell-message-text';
+
+    try {
+        const response = await fetch('/hechizos/lanzar', {
+            method: 'POST',
+            headers: {
+                ...getAuthHeaders(),
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                spell_name: spellName,
+                incantation: `${spellName}!`
+            })
+        });
+
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.detail || "Error al lanzar");
+
+        messageEl.textContent = `¡Éxito! ${data.message}`;
+        messageEl.classList.add('spell-success');
+        fetchData();
+
+    } catch (error) {
+        console.error("Error al lanzar hechizo:", error);
+        messageEl.textContent = `Error: ${error.message}`;
+        messageEl.classList.add('spell-error');
+        fetchData();
+    }
+}
+
+// --- 5. FUNCIONES DE ACTUALIZACIÓN DE UI ---
+
 function updateUserInfo(userData) {
     document.getElementById('user-name').innerText = userData.username;
     document.getElementById('user-role').innerText = userData.role;
-
     const permissionsList = document.getElementById('user-permissions');
-    permissionsList.innerHTML = ""; // Limpiar "Cargando..."
-
+    permissionsList.innerHTML = "";
     if (userData.permissions.length === 0) {
         permissionsList.innerHTML = "<li>Sin permisos asignados.</li>";
     } else {
@@ -125,24 +142,17 @@ function updateUserInfo(userData) {
     }
 }
 
-/**
- * Actualiza la tabla de auditoría con nuevos datos.
- */
 function updateAuditTable(tableData) {
     const tableBody = document.getElementById('auditTable').querySelector('tbody');
-    tableBody.innerHTML = ""; // Limpiar tabla
-
+    tableBody.innerHTML = "";
     if (tableData.error) {
         tableBody.innerHTML = `<tr><td colspan="4">Error al cargar logs: ${tableData.error}</td></tr>`;
         return;
     }
-
-    // Si no hay datos, mostrar un mensaje
     if (Object.keys(tableData).length === 0) {
         tableBody.innerHTML = `<tr><td colspan="4">Aún no se han registrado eventos.</td></tr>`;
         return;
     }
-
     for (const spellName in tableData) {
         const counts = tableData[spellName];
         const row = `
@@ -157,20 +167,15 @@ function updateAuditTable(tableData) {
     }
 }
 
-/**
- * Actualiza el gráfico en tiempo real.
- */
 function updatePerformanceChart(chartData) {
-    // (Este código asume que tienes 'performanceChart' definido globalmente)
+    if (!performanceChart) return;
     try {
         const now = new Date();
         const timeLabel = now.toLocaleTimeString();
         const chart = performanceChart.data;
-
         chart.labels.push(timeLabel);
         chart.datasets[0].data.push(chartData.current_latency_ms);
         chart.datasets[1].data.push(chartData.events_per_second);
-
         const maxDataPoints = 10;
         if (chart.labels.length > maxDataPoints) {
             chart.labels.shift();
@@ -185,72 +190,77 @@ function updatePerformanceChart(chartData) {
     }
 }
 
-// --- 5. INICIALIZACIÓN DEL GRÁFICO (PEGAR CÓDIGO FALTANTE) ---
-
-// (Asegúrate de que este código esté ANTES del 'DOMContentLoaded')
-const ctx = document.getElementById('performanceChart').getContext('2d');
-const performanceChart = new Chart(ctx, {
-    type: 'line',
-    data: {
-        labels: [],
-        datasets: [{
-            label: 'Latencia (ms)',
-            data: [],
-            borderColor: 'rgb(255, 215, 0)',
-            backgroundColor: 'rgba(255, 215, 0, 0.1)',
-            borderWidth: 2,
-            tension: 0.4,
-            yAxisID: 'yLatency',
-        }, {
-            label: 'Eventos/seg',
-            data: [],
-            borderColor: 'rgb(0, 191, 255)',
-            backgroundColor: 'rgba(0, 191, 255, 0.1)',
-            borderWidth: 2,
-            tension: 0.4,
-            yAxisID: 'yEvents',
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-            yLatency: { type: 'linear', position: 'left', ticks: { color: '#e0e0e0' }, grid: { color: '#4a4a7c' }},
-            yEvents: { type: 'linear', position: 'right', ticks: { color: '#e0e0e0' }, grid: { color: 'transparent' }},
-            x: { ticks: { color: '#e0e0e0' }, grid: { color: '#4a4a7c' }}
-        },
-        plugins: { legend: { labels: { color: '#e0e0e0' }}}
-    }
-});
-
-
-// --- 6. EJECUCIÓN ---
+// --- 6. PUNTO DE ENTRADA PRINCIPAL ---
 document.addEventListener('DOMContentLoaded', () => {
 
     // 1. Comprueba si el usuario está autenticado.
     const isAuthenticated = checkAuthentication();
 
-    // 2. Si NO lo está, detén la ejecución
+    // 2. Si NO lo está, detén la ejecución.
     if (!isAuthenticated) {
         return;
     }
 
-    // 3. Si SÍ lo está, carga los datos del dashboard.
-    console.log("Usuario autenticado, cargando dashboard...");
+    // 3. Si SÍ lo está, INICIALIZA EL GRÁFICO
+    console.log("Usuario autenticado, inicializando dashboard...");
+    try {
+        const ctx = document.getElementById('performanceChart').getContext('2d');
+        performanceChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Latencia (ms)',
+                    data: [],
+                    borderColor: 'rgb(255, 215, 0)',
+                    backgroundColor: 'rgba(255, 215, 0, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    yAxisID: 'yLatency',
+                }, {
+                    label: 'Eventos/seg',
+                    data: [],
+                    borderColor: 'rgb(0, 191, 255)',
+                    backgroundColor: 'rgba(0, 191, 255, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    yAxisID: 'yEvents',
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    yLatency: { type: 'linear', position: 'left', ticks: { color: '#e0e0e0' }, grid: { color: '#4a4a7c' }},
+                    yEvents: { type: 'linear', position: 'right', ticks: { color: '#e0e0e0' }, grid: { color: 'transparent' }},
+                    x: { ticks: { color: '#e0e0e0' }, grid: { color: '#4a4a7c' }}
+                },
+                plugins: { legend: { labels: { color: '#e0e0e0' }}}
+            }
+        });
+    } catch (e) {
+        console.error("No se pudo inicializar el gráfico:", e);
+    }
+
+    // 4. Llama a las funciones de carga de datos
     fetchData();
     fetchUserInfo();
 
-    // Configurar la actualización en "tiempo real" (polling)
+    // 5. Configura el 'setInterval'
     setInterval(fetchData, 5000);
 
-    // Lógica para el botón de Cerrar Sesión
+    // 6. Configura los 'event listeners' de los botones
     const logoutButton = document.getElementById('logout-button');
     if (logoutButton) {
         logoutButton.addEventListener('click', () => {
             console.log("Cerrando sesión...");
-            localStorage.clear();
             sessionStorage.clear();
-            window.location.href = '/login';
+            window.location.href = '/';
         });
+    }
+
+    const castButton = document.getElementById('cast-spell-button');
+    if (castButton) {
+        castButton.addEventListener('click', castSpell);
     }
 });
