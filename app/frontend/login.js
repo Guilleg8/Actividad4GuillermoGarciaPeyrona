@@ -38,7 +38,8 @@ document.getElementById('login-button').addEventListener('click', async () => {
         localStorage.setItem('magic_user_role', userData.role);
 
         // Redirige al dashboard principal
-        window.location.href = '/';
+        window.location.href = '/dashboard';
+
 
     } catch (error) {
         console.error("Error en el login:", error);

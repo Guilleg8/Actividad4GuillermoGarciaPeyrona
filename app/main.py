@@ -43,16 +43,23 @@ log = logging.getLogger("app.main")
 
 app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
 
-# 2. Crea una ruta para la página principal '/'
+# 2. ¡MODIFICADO! La raíz '/' AHORA SIRVE EL LOGIN.
 @app.get("/", include_in_schema=False)
+async def read_login():
+    """Sirve la página de inicio de sesión como la raíz."""
+    return FileResponse(FRONTEND_DIR / "login.html")
+
+# 3. ¡MODIFICADO! El dashboard AHORA ESTÁ EN '/dashboard'
+@app.get("/dashboard", include_in_schema=False)
 async def read_index():
-    """Sirve el archivo index.html como página principal."""
-    return FileResponse("frontend/index.html")
+    """Sirve el dashboard principal (index.html)."""
+    return FileResponse(FRONTEND_DIR / "index.html")
 
-
-# app/main.py
-
-# ... (otros imports, handlers de excepciones, etc.) ...
+# 4. Mantenemos la ruta /login por si el JS la llama (aunque no debería)
+@app.get("/login", include_in_schema=False)
+async def redirect_to_root():
+    """Sirve la página de inicio de sesión."""
+    return FileResponse(FRONTEND_DIR / "login.html")
 
 @app.post(
     "/hechizos/lanzar",

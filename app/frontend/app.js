@@ -15,8 +15,7 @@ function checkAuthentication() {
     const user = localStorage.getItem('magic_user_username');
     if (!user) {
         console.log("Usuario no encontrado, redirigiendo al login...");
-        window.location.href = '/login';
-        return false;
+        window.location.href = '/';
     }
     return true;
 }
@@ -52,7 +51,10 @@ async function fetchUserInfo() {
 
     } catch (error) {
         console.error("Error al obtener info del usuario:", error);
-
+        if (error.message.includes("Failed to fetch")) {
+            console.log("Servidor no responde. Cerrando sesión.");
+            sessionStorage.clear();
+            window.location.href = '/';
         // --- ¡BLOQUE 'CATCH' CORREGIDO! ---
         // No reemplazamos todo el HTML, solo actualizamos el texto.
         document.getElementById('user-name').innerText = "Error";
@@ -81,8 +83,7 @@ async function fetchData() {
         });
 
         if (response.status === 401) {
-             window.location.href = '/login'; // Sesión expirada o inválida
-             return;
+            window.location.href = '/'; // Redirige a la raíz             return;
         }
         if (!response.ok) throw new Error(`Error de red: ${response.statusText}`);
 
@@ -91,6 +92,10 @@ async function fetchData() {
         updatePerformanceChart(data.chart);
     } catch (error) {
         console.error("Error al obtener datos del dashboard:", error);
+        if (error.message.includes("Failed to fetch")) {
+            console.log("Servidor no responde. Cerrando sesión.");
+            sessionStorage.clear();
+            window.location.href = '/'; // Redirige a la raíz        }
     }
 }
 
@@ -244,6 +249,7 @@ document.addEventListener('DOMContentLoaded', () => {
         logoutButton.addEventListener('click', () => {
             console.log("Cerrando sesión...");
             localStorage.clear();
+            sessionStorage.clear();
             window.location.href = '/login';
         });
     }
