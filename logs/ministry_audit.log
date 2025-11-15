@@ -1,4 +1,16 @@
-AUDIT | 2025-11-06 15:24:58,195 | Usuario: harry_potter | Acción: Lanzar Hechizo | Detalles: {'status': 'INTENTO', 'peticion': "spell_name='Lumus' incantation='Lumus'"}
-AUDIT | 2025-11-06 15:24:58,197 | Usuario: harry_potter | Acción: Lanzar Hechizo | Detalles: {'status': 'FALLO', 'peticion': "spell_name='Lumus' incantation='Lumus'", 'error': "Hechizo 'Lumus' no encontrado."}
-AUDIT | 2025-11-12 12:49:11,107 | Usuario: admin | Acción: Lanzar Hechizo | Detalles: {'status': 'INTENTO', 'peticion': "spell_name='Lumos' incantation='Lumos!'"}
-AUDIT | 2025-11-12 12:49:11,117 | Usuario: admin | Acción: Lanzar Hechizo | Detalles: {'status': 'ÉXITO', 'peticion': "spell_name='Lumos' incantation='Lumos!'"}
+AUDIT | 2025-11-15 13:41:54,241 | Usuario: admin | Acción: Lanzar Hechizo | Detalles: {'status': 'INTENTO', 'peticion': "spell_name='Lumos' incantation='Lumos!'", 'hechizo': 'Lumos'}
+AUDIT | 2025-11-15 13:41:54,242 | Usuario: admin | Acción: Lanzar Hechizo | Detalles: {'status': 'ÉXITO', 'peticion': "spell_name='Lumos' incantation='Lumos!'", 'hechizo': 'Lumos'}
+AUDIT | 2025-11-15 13:41:57,512 | Usuario: admin | Acción: Lanzar Hechizo | Detalles: {'status': 'INTENTO', 'peticion': "spell_name='Expecto Patronum' incantation='Expecto Patronum!'", 'hechizo': 'Expecto Patronum'}
+AUDIT | 2025-11-15 13:41:57,513 | Usuario: admin | Acción: Lanzar Hechizo | Detalles: {'status': 'ÉXITO', 'peticion': "spell_name='Expecto Patronum' incantation='Expecto Patronum!'", 'hechizo': 'Expecto Patronum'}
+AUDIT | 2025-11-15 13:41:58,720 | Usuario: admin | Acción: Lanzar Hechizo | Detalles: {'status': 'INTENTO', 'peticion': "spell_name='Expecto Patronum' incantation='Expecto Patronum!'", 'hechizo': 'Expecto Patronum'}
+AUDIT | 2025-11-15 13:41:58,722 | Usuario: admin | Acción: Lanzar Hechizo | Detalles: {'status': 'ÉXITO', 'peticion': "spell_name='Expecto Patronum' incantation='Expecto Patronum!'", 'hechizo': 'Expecto Patronum'}
+AUDIT | 2025-11-15 13:42:04,689 | Usuario: admin | Acción: Lanzar Hechizo | Detalles: {'status': 'INTENTO', 'peticion': "spell_name='Wingardium Leviosa' incantation='Wingardium Leviosa!'", 'hechizo': 'Wingardium Leviosa'}
+AUDIT | 2025-11-15 13:42:04,690 | Usuario: admin | Acción: Lanzar Hechizo | Detalles: {'status': 'FALLO', 'peticion': "spell_name='Wingardium Leviosa' incantation='Wingardium Leviosa!'", 'hechizo': 'Wingardium Leviosa', 'error': "Hechizo 'Wingardium Leviosa' no encontrado."}
+AUDIT | 2025-11-15 13:42:10,602 | Usuario: admin | Acción: Lanzar Hechizo | Detalles: {'status': 'INTENTO', 'peticion': "spell_name='Avada Kedavra' incantation='Avada Kedavra!'", 'hechizo': 'Avada Kedavra'}
+AUDIT | 2025-11-15 13:42:10,603 | Usuario: admin | Acción: Lanzar Hechizo | Detalles: {'status': 'FALLO', 'peticion': "spell_name='Avada Kedavra' incantation='Avada Kedavra!'", 'hechizo': 'Avada Kedavra', 'error': "¡Uso ilegal de Hechizo Imperdonable 'Avada Kedavra' detectado por admin!"}
+AUDIT | 2025-11-15 13:43:33,631 | Usuario: harry_potter | Acción: Lanzar Hechizo | Detalles: {'status': 'INTENTO', 'peticion': "spell_name='Lumos' incantation='Lumos!'", 'hechizo': 'Lumos'}
+AUDIT | 2025-11-15 13:43:33,633 | Usuario: harry_potter | Acción: Lanzar Hechizo | Detalles: {'status': 'ÉXITO', 'peticion': "spell_name='Lumos' incantation='Lumos!'", 'hechizo': 'Lumos'}
+AUDIT | 2025-11-15 13:43:34,963 | Usuario: harry_potter | Acción: Lanzar Hechizo | Detalles: {'status': 'INTENTO', 'peticion': "spell_name='Lumos' incantation='Lumos!'", 'hechizo': 'Lumos'}
+AUDIT | 2025-11-15 13:43:34,964 | Usuario: harry_potter | Acción: Lanzar Hechizo | Detalles: {'status': 'ÉXITO', 'peticion': "spell_name='Lumos' incantation='Lumos!'", 'hechizo': 'Lumos'}
+AUDIT | 2025-11-15 13:43:37,854 | Usuario: harry_potter | Acción: Lanzar Hechizo | Detalles: {'status': 'INTENTO', 'peticion': "spell_name='Expecto Patronum' incantation='Expecto Patronum!'", 'hechizo': 'Expecto Patronum'}
+AUDIT | 2025-11-15 13:43:37,856 | Usuario: harry_potter | Acción: Lanzar Hechizo | Detalles: {'status': 'ÉXITO', 'peticion': "spell_name='Expecto Patronum' incantation='Expecto Patronum!'", 'hechizo': 'Expecto Patronum'}

@@ -48,40 +48,41 @@ def log_audit(action_name: str) -> Callable:
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
 
-            # 'time' ahora está definido gracias al import
-            start_time = time.monotonic()  # Iniciar temporizador
+            start_time = time.monotonic()
 
             user, audit_service, _ = _get_deps_from_kwargs(kwargs)
 
-            # (El primer argumento suele ser el body)
             request_body = args[0] if args else kwargs.get('spell')
 
+            # --- Lógica para obtener el nombre del hechizo ---
             spell_name = "unknown"
             if request_body and hasattr(request_body, 'spell_name'):
                 spell_name = request_body.spell_name
-            # Para el /test-audit, el body es None, así que le damos un nombre
             elif action_name == "PruebaDeAuditoria":
                 spell_name = "PruebaDeAuditoria"
+            # --- Fin de la lógica ---
 
-            details = {"peticion": str(request_body)}
+            # --- ¡AQUÍ ESTÁ EL ARREGLO! ---
+            # Ahora 'details' SIEMPRE incluye el nombre del hechizo.
+            details = {
+                "peticion": str(request_body),
+                "hechizo": spell_name  # <-- Esta es la parte que faltaba
+            }
 
             if not audit_service:
-                log.error(f"Aspecto 'log_audit' no pudo encontrar 'AuditLogger' para la acción: {action_name}")
+                log.error(f"Aspecto 'log_audit' no pudo encontrar 'AuditLogger'...")
                 return func(*args, **kwargs)
 
-            log.debug(f"ASPECTO (Audit): Registrando INTENTO para '{action_name}'")
+            # El 'details' corregido se pasa aquí
             audit_service.log(user, action_name, {"status": "INTENTO", **details})
 
             try:
-                # 2. Ejecutar la lógica de negocio (la función original)
                 result = func(*args, **kwargs)
                 latency = time.monotonic() - start_time
 
-                # 3. Lógica "Después" (Éxito)
-                log.debug(f"ASPECTO (Audit): Registrando ÉXITO para '{action_name}'")
+                # El 'details' corregido se pasa aquí
                 audit_service.log(user, action_name, {"status": "ÉXITO", **details})
 
-                # --- ¡ACTUALIZAR MÉTRICAS (Éxito)! ---
                 SPELL_CAST_LATENCY.labels(spell_name=spell_name, status='success').observe(latency)
                 SPELL_CAST_COUNTER.labels(spell_name=spell_name, status='success').inc()
                 EVENT_COUNTER.labels(event_type='spell_success').inc()
@@ -91,15 +92,13 @@ def log_audit(action_name: str) -> Callable:
             except Exception as e:
                 latency = time.monotonic() - start_time
 
-                # 4. Lógica "Después" (Fallo)
-                log.debug(f"ASPECTO (Audit): Registrando FALLO para '{action_name}'")
                 details["error"] = str(e)
+                # El 'details' corregido se pasa aquí
                 audit_service.log(user, action_name, {"status": "FALLO", **details})
 
                 status_label = 'fail_security' if isinstance(e, PermissionDeniedError) else 'fail_logic'
                 event_label = 'security_fail' if isinstance(e, PermissionDeniedError) else 'spell_fail'
 
-                # --- ¡ACTUALIZAR MÉTRICAS (Fallo)! ---
                 SPELL_CAST_LATENCY.labels(spell_name=spell_name, status=status_label).observe(latency)
                 SPELL_CAST_COUNTER.labels(spell_name=spell_name, status=status_label).inc()
                 EVENT_COUNTER.labels(event_type=event_label).inc()

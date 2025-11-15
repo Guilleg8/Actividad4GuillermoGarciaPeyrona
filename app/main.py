@@ -9,7 +9,13 @@ from fastapi.staticfiles import StaticFiles
 
 # --- ¡NUEVO! Importar Pathlib ---
 from pathlib import Path
-
+from app.config_logging import setup_logging
+from app.domain import (
+    User, SpellRequest, LoginRequest, # <-- Asegúrate de que LoginRequest esté
+    PermissionDeniedError,
+    UnforgivableSpellError,
+    SpellNotFoundError
+)
 from app.config_logging import setup_logging
 from app.domain import (
     User, SpellRequest, PermissionDeniedError, UnforgivableSpellError, SpellNotFoundError
@@ -296,12 +302,78 @@ def cast_spell(
 
 AUDIT_LOG_FILE = LOGS_DIR / "ministry_audit.log"
 
+
 @app.get("/api/dashboard-data", summary="Datos para el Dashboard del Ministerio")
 def get_dashboard_data():
-    table_data = _parse_audit_log()
-    chart_data = _get_performance_metrics()
-    return {"table": table_data, "chart": chart_data}
+    """
+    Endpoint que el frontend (JS) llamará para obtener
+    los datos de la tabla y el gráfico.
+    """
 
+    # 1. Datos de la Tabla (Eventos Mágicos)
+    table_data = _parse_audit_log()
+
+    # 2. Datos del Gráfico (Rendimiento)
+    chart_data = _get_performance_metrics()
+
+    return {
+        "table": table_data,
+        "chart": chart_data
+    }
+
+
+def _parse_audit_log() -> dict:
+    """
+    Función auxiliar: Lee y parsea el archivo de log de auditoría (formato texto).
+    """
+    log.debug(f"Leyendo archivo de log: {AUDIT_LOG_FILE}")
+    spell_counts = {}
+
+    try:
+        with open(AUDIT_LOG_FILE, 'r', encoding='utf-8') as f:
+            for line in f:
+                # El formato del log es:
+                # AUDIT | ... | ... | Detalles: {'status': 'ÉXITO', 'hechizo': 'Lumos'}
+
+                # Usamos regex para encontrar el estado y el nombre del hechizo
+                status_match = re.search(r"'status': '(\w+)'", line)
+
+                # Intenta encontrar un hechizo
+                spell_match = re.search(r"'hechizo': '([\w\s]+)'", line)
+
+                spell_name = "Desconocido"
+
+                if spell_match:
+                    spell_name = spell_match.group(1)
+                elif "PruebaDeAuditoria" in line:  # Maneja nuestro endpoint de prueba
+                    spell_name = "PruebaDeAuditoria"
+                else:
+                    continue  # Si la línea no tiene hechizo, la saltamos
+
+                if status_match:
+                    status = status_match.group(1)  # 'INTENTO', 'ÉXITO', 'FALLO'
+
+                    if spell_name not in spell_counts:
+                        spell_counts[spell_name] = {"INTENTO": 0, "ÉXITO": 0, "FALLO": 0}
+
+                    if status == "INTENTO":
+                        spell_counts[spell_name]["INTENTO"] += 1
+                    elif status == "ÉXITO":
+                        spell_counts[spell_name]["ÉXITO"] += 1
+                    elif status == "FALLO":
+                        spell_counts[spell_name]["FALLO"] += 1
+
+    except FileNotFoundError:
+        log.warning(f"El archivo de auditoría {AUDIT_LOG_FILE} no se encontró.")
+        return {"error": "Log no encontrado"}
+    except Exception as e:
+        log.error(f"Error parseando el log de auditoría: {e}")
+        return {"error": str(e)}
+
+    return spell_counts
+
+
+# ... (El resto de tu código, incluyendo los endpoints /hechizos/lanzar y /api/user-info) ...
 def _parse_audit_log() -> dict:
     log.debug(f"Leyendo archivo de log: {AUDIT_LOG_FILE}")
     spell_counts = {}
@@ -326,11 +398,19 @@ def _parse_audit_log() -> dict:
         return {"error": str(e)}
     return spell_counts
 AUDIT_LOG_FILE = LOGS_DIR / "ministry_audit.log"
+
+
 def _get_performance_metrics() -> dict:
+    """
+    Función auxiliar: Simula métricas de rendimiento en tiempo real.
+    """
     avg_latency = random.uniform(0.05, 0.25)
     events_per_sec = random.randint(10, 100)
-    return {"current_latency_ms": round(avg_latency * 1000, 2), "events_per_second": events_per_sec}
 
+    return {
+        "current_latency_ms": round(avg_latency * 1000, 2),
+        "events_per_second": events_per_sec,
+    }
 # --- ¡FIN DE LAS RUTAS DE API! ---
 
 # --- ¡SECCIÓN MODIFICADA! ---
