@@ -35,9 +35,9 @@ La arquitectura está diseñada para ser **modular** y **desacoplada**:
 * **`frontend/`**: Contiene la capa de presentación (HTML/CSS/JS), completamente separada del backend.
 
 ## Estructura del Proyecto
-
+``
 Actividad4GuillermoGarciaPeyrona/ ├── app/ │ ├── frontend/ │ │ ├── app.js # Lógica del Dashboard │ │ ├── index.html # HTML del Dashboard │ │ ├── login.css # Estilos del Login │ │ ├── login.html # HTML del Login │ │ ├── login.js # Lógica del Login │ │ └── style.css # Estilos del Dashboard │ ├── init.py │ ├── aspects.py # Decoradores AOP (Seguridad, Auditoría) │ ├── config_logging.py # Configuración de logging │ ├── dependencies.py # Inyección de Dependencias │ ├── domain.py # Lógica de Negocio Pura (Hechizos) │ ├── main.py # Servidor FastAPI y Endpoints │ ├── metrics.py # Definiciones de Prometheus │ └── services.py # Lógica de Servicios (Roles, Usuarios) ├── logs/ │ └── ministry_audit.log # Archivo de auditoría └── requirements.txt # Dependencias del proyecto
-
+``
 
 ## Instalación
 
