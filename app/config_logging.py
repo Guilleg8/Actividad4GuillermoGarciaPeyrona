@@ -1,21 +1,14 @@
-# app/config_logging.py
-
 import logging
 import logging.config
 import sys
 import os
-from pathlib import Path  # <-- ¡IMPORTANTE!
+from pathlib import Path
 
-# --- Definir la ruta raíz del proyecto ---
 CONFIG_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = CONFIG_DIR.parent
-LOG_DIR = PROJECT_ROOT / "logs"  # <-- Apuntar a la carpeta 'logs' raíz
-
+LOG_DIR = PROJECT_ROOT / "logs"
 
 def setup_logging():
-    """Configura el sistema de logging (JSON deshabilitado)."""
-
-    # LOG_DIR ya está definido arriba
     if not os.path.exists(LOG_DIR):
         os.makedirs(LOG_DIR)
         print(f"Directorio de logs creado en: {LOG_DIR}")
@@ -42,7 +35,6 @@ def setup_logging():
             'audit_file': {
                 'class': 'logging.handlers.RotatingFileHandler',
                 'formatter': 'audit',
-                # ¡Ruta corregida!
                 'filename': os.path.join(LOG_DIR, 'ministry_audit.log'),
                 'maxBytes': 10485760,
                 'backupCount': 5,

@@ -1,11 +1,9 @@
-# app/aspects.py
 
 import functools
 import logging
-import time  # <--- ¡AQUÍ ESTÁ LA LÍNEA QUE FALTABA!
-from typing import Callable, Any
+import time
+from typing import Callable
 
-# --- Imports necesarios para los aspectos ---
 from app.services import AuditLogger, AuthService
 from app.domain import User, PermissionDeniedError
 from app.metrics import (
@@ -14,18 +12,11 @@ from app.metrics import (
     EVENT_COUNTER
 )
 
-# --- Logger para los propios aspectos ---
 log = logging.getLogger("app.aspects")
 log.info("Módulo de Aspectos (AOP) cargado.")
 
 
-# --- Función Auxiliar ---
-
 def _get_deps_from_kwargs(kwargs: dict) -> tuple:
-    """
-    Función auxiliar para extraer dependencias clave (inyectadas por FastAPI)
-    desde los argumentos de la función decorada.
-    """
     current_user: User | None = kwargs.get('current_user')
     audit: AuditLogger | None = kwargs.get('audit')
     auth: AuthService | None = kwargs.get('auth')
@@ -37,12 +28,7 @@ def _get_deps_from_kwargs(kwargs: dict) -> tuple:
     return current_user, audit, auth
 
 
-# --- Aspecto 1: Auditoría (@around) ---
-
 def log_audit(action_name: str) -> Callable:
-    """
-    Aspecto (decorador) para la auditoría Y MÉTRICAS de negocio.
-    """
 
     def decorator(func: Callable) -> Callable:
         @functools.wraps(func)
@@ -54,33 +40,27 @@ def log_audit(action_name: str) -> Callable:
 
             request_body = args[0] if args else kwargs.get('spell')
 
-            # --- Lógica para obtener el nombre del hechizo ---
             spell_name = "unknown"
             if request_body and hasattr(request_body, 'spell_name'):
                 spell_name = request_body.spell_name
             elif action_name == "PruebaDeAuditoria":
                 spell_name = "PruebaDeAuditoria"
-            # --- Fin de la lógica ---
 
-            # --- ¡AQUÍ ESTÁ EL ARREGLO! ---
-            # Ahora 'details' SIEMPRE incluye el nombre del hechizo.
             details = {
                 "peticion": str(request_body),
-                "hechizo": spell_name  # <-- Esta es la parte que faltaba
+                "hechizo": spell_name
             }
 
             if not audit_service:
                 log.error(f"Aspecto 'log_audit' no pudo encontrar 'AuditLogger'...")
                 return func(*args, **kwargs)
 
-            # El 'details' corregido se pasa aquí
             audit_service.log(user, action_name, {"status": "INTENTO", **details})
 
             try:
                 result = func(*args, **kwargs)
                 latency = time.monotonic() - start_time
 
-                # El 'details' corregido se pasa aquí
                 audit_service.log(user, action_name, {"status": "ÉXITO", **details})
 
                 SPELL_CAST_LATENCY.labels(spell_name=spell_name, status='success').observe(latency)
@@ -93,7 +73,6 @@ def log_audit(action_name: str) -> Callable:
                 latency = time.monotonic() - start_time
 
                 details["error"] = str(e)
-                # El 'details' corregido se pasa aquí
                 audit_service.log(user, action_name, {"status": "FALLO", **details})
 
                 status_label = 'fail_security' if isinstance(e, PermissionDeniedError) else 'fail_logic'
@@ -110,19 +89,12 @@ def log_audit(action_name: str) -> Callable:
     return decorator
 
 
-# --- Aspecto 2: Seguridad (@before) ---
-
 def require_permission(permission: str) -> Callable:
-    """
-    Aspecto (decorador) para la seguridad.
-    Verifica si el usuario tiene un PERMISO específico.
-    """
 
     def decorator(func: Callable) -> Callable:
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
 
-            # 1. Lógica "Antes" (Verificación)
             user, _, auth_service = _get_deps_from_kwargs(kwargs)
 
             if not auth_service:
@@ -140,7 +112,6 @@ def require_permission(permission: str) -> Callable:
 
             log.debug(f"ASPECTO (Security): Acceso concedido.")
 
-            # 2. Ejecutar la lógica de negocio (si el permiso es válido)
             return func(*args, **kwargs)
 
         return wrapper

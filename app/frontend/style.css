@@ -1,4 +1,3 @@
-/* style.css */
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     background-color: #1a1a2e;
@@ -13,62 +12,44 @@ header {
     margin-bottom: 30px;
 }
 
-/* app/frontend/style.css */
-
-/* ... (tus estilos anteriores para 'body', 'header', 'card') ... */
-
 main {
     display: grid;
-    /* Creamos una cuadrícula de 3 columnas iguales */
     grid-template-columns: repeat(3, 1fr);
     gap: 20px;
 }
 
-/* --- FILA 1 --- */
-
 #perfil-usuario {
-    /* Perfil: ocupa la 1ª columna (1/3) */
     grid-column: 1 / 2;
     grid-row: 1 / 2;
 }
 
 #arquitectura {
-    /* Arquitectura: ocupa 2 columnas (2/3) */
     grid-column: 2 / 4;
     grid-row: 1 / 2;
 }
 
-/* --- FILA 2 --- */
-
 #rendimiento {
-    /* Rendimiento: ocupa la 1ª columna (1/3) */
     grid-column: 1 / 2;
     grid-row: 2 / 3;
 }
 
 #lanzar-hechizo {
-    /* Lanzar Hechizo: ocupa la 2ª columna (1/3) */
     grid-column: 2 / 3;
     grid-row: 2 / 3;
 }
 
 #auditoria {
-    /* Auditoría: ocupa la 3ª columna (1/3) */
     grid-column: 3 / 4;
     grid-row: 2 / 3;
 }
 
-/* --- Estilos para que el diagrama se ajuste --- */
 .mermaid {
-    /* Asegura que el diagrama no se desborde */
     display: flex;
     justify-content: center;
     align-items: center;
     width: 100%;
-    min-height: 400px; /* Dale una altura mínima */
+    min-height: 400px;
 }
-
-/* ... (el resto de tus estilos: .logout-button, .form-group, etc.) ... */
 
 .card {
     background-color: #2a2a4e;
@@ -83,7 +64,6 @@ main {
     padding-bottom: 10px;
 }
 
-/* --- Tabla de Auditoría --- */
 table {
     width: 100%;
     border-collapse: collapse;
@@ -104,7 +84,6 @@ tbody tr:hover {
     background-color: #3a3a6e;
 }
 
-/* --- Gráfico de Rendimiento --- */
 .chart-container {
     position: relative;
     height: 300px;
@@ -117,7 +96,6 @@ tbody tr:hover {
     font-size: 1.1em;
 }
 
-/* --- Diagrama Mermaid --- */
 .mermaid {
     background-color: #f0f0f0;
     border-radius: 5px;
@@ -131,7 +109,7 @@ tbody tr:hover {
     margin-top: 20px;
     border: none;
     border-radius: 5px;
-    background-color: #e63946; /* Un rojo para "cerrar sesión" */
+    background-color: #e63946;
     color: #f1faee;
     font-size: 16px;
     font-weight: bold;
@@ -178,15 +156,14 @@ button:hover {
     background-color: #f0c000;
 }
 
-/* Para los mensajes de éxito/error del hechizo */
 .spell-message-text {
     font-weight: bold;
     height: 1.2em;
     margin-top: 15px;
 }
 .spell-success {
-    color: #00ff99; /* Verde brillante */
+    color: #00ff99;
 }
 .spell-error {
-    color: #e63946; /* Rojo de error */
+    color: #e63946;
 }

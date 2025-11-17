@@ -1,6 +1,8 @@
-jsonlogging
+#framework
 fastapi
+#Servidor que ejecuta la aplicacion FastApi
 uvicorn[standard]
+#Libreria para crear contenedores
 prometheus-client
-python-json-logger
-fastapi-cors
+#Para que FastApi sirva archivos estaticos
+aiofiles

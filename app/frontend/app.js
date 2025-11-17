@@ -1,21 +1,14 @@
-// app/frontend/app.js
-
-// --- 1. CONSTANTES GLOBALES ---
 const API_URL = "/api/dashboard-data";
 const USER_INFO_URL = "/api/user-info";
 
-// --- 2. DECLARACIÓN DE VARIABLES GLOBALES ---
 let performanceChart;
 
-// --- 3. FUNCIONES DE AUTENTICACIÓN ---
-
 function checkAuthentication() {
-    // ¡IMPORTANTE! Lee los datos de sessionStorage
     const user = sessionStorage.getItem('magic_user_username');
 
     if (!user) {
         console.log("checkAuthentication falló: No se encontró usuario. Redirigiendo a /");
-        window.location.href = '/'; // Redirige a la raíz (login)
+        window.location.href = '/';
         return false;
     }
     console.log("checkAuthentication OK. Usuario:", user);
@@ -28,8 +21,6 @@ function getAuthHeaders() {
         'X-User-Role': sessionStorage.getItem('magic_user_role') || ''
     };
 }
-
-// --- 4. FUNCIONES DE CARGA DE DATOS (FETCH) ---
 
 async function fetchUserInfo() {
     console.log("fetchUserInfo: Obteniendo info del usuario...");
@@ -122,8 +113,6 @@ async function castSpell() {
     }
 }
 
-// --- 5. FUNCIONES DE ACTUALIZACIÓN DE UI ---
-
 function updateUserInfo(userData) {
     document.getElementById('user-name').innerText = userData.username;
     document.getElementById('user-role').innerText = userData.role;
@@ -190,18 +179,14 @@ function updatePerformanceChart(chartData) {
     }
 }
 
-// --- 6. PUNTO DE ENTRADA PRINCIPAL ---
 document.addEventListener('DOMContentLoaded', () => {
 
-    // 1. Comprueba si el usuario está autenticado.
     const isAuthenticated = checkAuthentication();
 
-    // 2. Si NO lo está, detén la ejecución.
     if (!isAuthenticated) {
         return;
     }
 
-    // 3. Si SÍ lo está, INICIALIZA EL GRÁFICO
     console.log("Usuario autenticado, inicializando dashboard...");
     try {
         const ctx = document.getElementById('performanceChart').getContext('2d');
@@ -243,22 +228,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     try {
         mermaid.initialize({
-            theme: 'default', // Borde amarillo
+            theme: 'default',
 
         });
-        mermaid.run(); // Le dice a Mermaid que busque y renderice todos los diagramas
+        mermaid.run();
     } catch (e) {
         console.error("No se pudo inicializar o renderizar Mermaid:", e);
     }
 
-    // 4. Llama a las funciones de carga de datos
     fetchData();
     fetchUserInfo();
 
-    // 5. Configura el 'setInterval'
     setInterval(fetchData, 5000);
 
-    // 6. Configura los 'event listeners' de los botones
     const logoutButton = document.getElementById('logout-button');
     if (logoutButton) {
         logoutButton.addEventListener('click', () => {

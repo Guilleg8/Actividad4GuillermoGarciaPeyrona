@@ -1,5 +1,3 @@
-/* app/frontend/login.css */
-
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     background-color: #1a1a2e;
@@ -83,9 +81,9 @@ button:hover {
 }
 
 .error-text {
-    color: #e63946; /* Rojo de error */
+    color: #e63946;
     font-weight: bold;
     margin-top: -10px;
     margin-bottom: 15px;
-    height: 1.2em; /* Reserva espacio para que no "salte" */
+    height: 1.2em;
 }
