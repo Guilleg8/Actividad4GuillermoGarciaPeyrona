@@ -82,16 +82,35 @@ class ExpectoPatronum(Hechizo):
         return "Patronus conjurado para defensa."
 
 
+# app/domain.py
+
+# ... (tus otras clases: Hechizo, Lumos, ExpectoPatronum) ...
+
 class AvadaKedavra(Hechizo):
-    """Implementación de un hechizo imperdonable."""
+    """
+    Implementación de un hechizo imperdonable.
+    Solo el rol 'Ministro' (admin) tiene autorización para ejecutarlo.
+    """
 
     def execute(self, user: User, **kwargs) -> str:
-        # Lógica de negocio que resulta en un error de dominio
-        print(f"LÓGICA DE NEGOCIO: {user.username} intentó {kwargs.get('incantation')}")
-        raise UnforgivableSpellError(
-            spell_name="Avada Kedavra",
-            username=user.username
-        )
+        # --- ¡ESTA ES LA NUEVA LÓGICA DE SEGURIDAD! ---
+        # 1. Comprueba si el rol del usuario NO es 'Ministro'.
+        if user.level != "Ministro":
+            print(f"LÓGICA DE NEGOCIO: ¡ACCESO DENEGADO! {user.username} (Rol: {user.level}) "
+                  f"intentó lanzar Avada Kedavra.")
+
+            # 2. Lanza el error (esto lo verá el usuario en el dashboard).
+            raise UnforgivableSpellError(
+                spell_name="Avada Kedavra",
+                username=user.username
+            )
+
+        # 3. Si llegamos aquí, el usuario ES un "Ministro" (admin).
+        print(f"LÓGICA DE NEGOCIO: {user.username} (Rol: Ministro) "
+              f"ha ejecutado Avada Kedavra (Autorización de Admin).")
+
+        # 4. Simulación de la ejecución "exitosa" (solo para el admin).
+        return "Hechizo Imperdonable ejecutado con Autorización del Ministerio."
 
 class LoginRequest(BaseModel):
     """El cuerpo (body) esperado para la petición de login."""

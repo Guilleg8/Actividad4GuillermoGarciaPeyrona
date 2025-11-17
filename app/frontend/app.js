@@ -244,7 +244,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
         mermaid.initialize({
             theme: 'default', // Borde amarillo
-            }
+
         });
         mermaid.run(); // Le dice a Mermaid que busque y renderice todos los diagramas
     } catch (e) {

@@ -38,26 +38,26 @@
             <h2>Arquitectura Modular del Sistema</h2>
 
             <div class="mermaid">
-                graph TD
-                    A["Frontend JS"] -- HTTP (JSON) --> B1["Endpoints"]
+            graph TD
+                A["Frontend JS"] -- HTTP (JSON) --> B1["Endpoints"]
 
-                    subgraph Backend
-                        B1
-                        B2["Middleware/AOP"]
-                    end
+                subgraph Backend
+                    B1
+                    B2["Middleware/AOP"]
+                end
 
-                    B1 --> C{"Lógica de Negocio"}
-                    B2 -- Aplica --> B1
+                B1 --> C{"Lógica de Negocio"}
+                B2 -- Aplica --> B1
 
-                    B2 -- Usa --> D["Seguridad (AuthService)"]
-                    B2 -- Usa --> E["Auditoría (AuditLogger)"]
+                B2 -- Usa --> D["Seguridad (AuthService)"]
+                B2 -- Usa --> E["Auditoría (AuditLogger)"]
 
-                    C --> F["Hechizos (Clases)"]
-                    C -- Usa --> G["Contenedor IoC (SpellRegistry)"]
-                    G --> F
+                C --> F["Hechizos (Clases)"]
+                C -- Usa --> G["Contenedor IoC (SpellRegistry)"]
+                G --> F
 
-                    E --> H["Logs (Archivos/DB)"]
-                    D --> I["Roles/Permisos"]
+                E --> H["Logs (Archivos/DB)"]
+                D --> I["Roles/Permisos"]
             </div>
         </section>
             <section class="card" id="lanzar-hechizo">
