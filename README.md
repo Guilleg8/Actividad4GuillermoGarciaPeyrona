@@ -35,7 +35,7 @@ La arquitectura está diseñada para ser **modular** y **desacoplada**:
 * **`frontend/`**: Contiene la capa de presentación (HTML/CSS/JS), completamente separada del backend.
 
 ## Estructura del Proyecto
-``
+```
 Actividad4GuillermoGarciaPeyrona/
 ├── app/
 │   ├── frontend/
@@ -56,7 +56,7 @@ Actividad4GuillermoGarciaPeyrona/
 ├── logs/
 │   └── ministry_audit.log    # Archivo de auditoría
 └── requirements.txt          # Dependencias del proyecto
-``
+```
 
 ## Instalación
 
