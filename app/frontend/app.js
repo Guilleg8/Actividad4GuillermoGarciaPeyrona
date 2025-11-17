@@ -241,6 +241,15 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (e) {
         console.error("No se pudo inicializar el gráfico:", e);
     }
+    try {
+        mermaid.initialize({
+            theme: 'default', // Borde amarillo
+            }
+        });
+        mermaid.run(); // Le dice a Mermaid que busque y renderice todos los diagramas
+    } catch (e) {
+        console.error("No se pudo inicializar o renderizar Mermaid:", e);
+    }
 
     // 4. Llama a las funciones de carga de datos
     fetchData();

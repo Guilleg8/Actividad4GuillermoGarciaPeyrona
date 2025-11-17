@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-M">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Ministerio de Magia</title>
-    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/style.css?v=1.1">
 </head>
 <body>
 
@@ -13,8 +13,7 @@
     </header>
 
     <main>
-        <section class="card">
-            <section class="card" id="user-profile-card">
+        <section class="card" id="perfil-usuario">
                 <h2>Perfil de Usuario</h2>
                 <p><strong>Usuario:</strong> <span id="user-name">...</span></p>
                 <p><strong>Rol:</strong> <span id="user-role">...</span></p>
@@ -23,8 +22,8 @@
                     <li>...</li>
                 </ul>
                 <button id="logout-button" class="logout-button">Cerrar Sesión</button>
-            </section>
-
+        </section>
+        <section class="card" id="rendimiento">
             <h2>Rendimiento del Sistema (Tiempo Real)</h2>
             <div class="chart-container">
                 <canvas id="performanceChart"></canvas>
@@ -35,34 +34,33 @@
             </div>
         </section>
 
-        <section class="card">
+        <section class="card" id="arquitectura">
             <h2>Arquitectura Modular del Sistema</h2>
 
             <div class="mermaid">
-                    graph TD
-                    A[Frontend JS] -- HTTP (JSON) --> B[API - FastAPI]
+                graph TD
+                    A["Frontend JS"] -- HTTP (JSON) --> B1["Endpoints"]
 
-                    subgraph B [ ]
-                        B1(Endpoints)
-                        B2(Middleware/AOP)
-                        B3(DI Container)
+                    subgraph Backend
+                        B1
+                        B2["Middleware/AOP"]
                     end
 
-                    B1 --> C{Lógica de Negocio}
+                    B1 --> C{"Lógica de Negocio"}
                     B2 -- Aplica --> B1
 
-                    B2 -- Usa --> D[Seguridad (AuthService)]
-                    B2 -- Usa --> E[Auditoría (AuditLogger)]
+                    B2 -- Usa --> D["Seguridad (AuthService)"]
+                    B2 -- Usa --> E["Auditoría (AuditLogger)"]
 
-                    C --> F[Hechizos (Clases)]
-                    C -- Usa --> G[Contenedor IoC (SpellRegistry)]
+                    C --> F["Hechizos (Clases)"]
+                    C -- Usa --> G["Contenedor IoC (SpellRegistry)"]
                     G --> F
 
-                    E --> H[Logs (Archivos/DB)]
-                    D --> I[Roles/Permisos]
+                    E --> H["Logs (Archivos/DB)"]
+                    D --> I["Roles/Permisos"]
             </div>
         </section>
-        <section class="card">
+            <section class="card" id="lanzar-hechizo">
                 <h2>Lanzar Hechizo</h2>
                 <p>Seleccione un hechizo para ejecutar (requiere permiso 'spell:cast').</p>
 
@@ -80,7 +78,7 @@
 
                 <button id="cast-spell-button">¡Lanzar!</button>
             </section>
-        <section class="card">
+        <section class="card" id="auditoria">
             <h2>Auditoría de Eventos Mágicos</h2>
             <table id="auditTable">
                 <thead>
@@ -98,6 +96,7 @@
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 
     <script src="/static/app.js"></script>
