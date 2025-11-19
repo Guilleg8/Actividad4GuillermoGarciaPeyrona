@@ -24,7 +24,7 @@ document.getElementById('login-button').addEventListener('click', async () => {
             throw new Error(errorData.detail || "Error desconocido");
         }
 
-        const userData = await response.json(); // {username: "...", role: "..."}
+        const userData = await response.json();
 
         console.log(`Login OK. Guardando en sessionStorage: ${userData.username}, ${userData.role}`);
 

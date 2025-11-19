@@ -1,3 +1,4 @@
+from fastapi import Request, HTTPException, status
 from app.services import (
     AuditLogger,
     AuthService,
@@ -10,10 +11,20 @@ from app.domain import (
     ExpectoPatronum,
     AvadaKedavra
 )
-from fastapi import Request
+
 
 _audit_service_instance = AuditLogger()
 _auth_service_instance = AuthService(roles_map=ROLES_TO_PERMISSIONS)
+
+def create_spell_registry() -> SpellRegistry:
+    registry = SpellRegistry()
+    registry.register("Lumos", Lumos)
+    registry.register("Expecto Patronum", ExpectoPatronum)
+    registry.register("Avada Kedavra", AvadaKedavra)
+    return registry
+
+_spell_registry_instance = create_spell_registry()
+
 
 def get_audit_logger() -> AuditLogger:
     return _audit_service_instance
@@ -21,27 +32,11 @@ def get_audit_logger() -> AuditLogger:
 def get_auth_service() -> AuthService:
     return _auth_service_instance
 
-def create_spell_registry() -> SpellRegistry:
-
-    registry = SpellRegistry()
-
-    registry.register("Lumos", Lumos)
-    registry.register("Expecto Patronum", ExpectoPatronum)
-    registry.register("Avada Kedavra", AvadaKedavra)
-
-    return registry
-
-
-_spell_registry_instance = create_spell_registry()
-
-
 def get_spell_registry() -> SpellRegistry:
     return _spell_registry_instance
 
-
 class NotAuthenticatedError(Exception):
     pass
-
 
 def get_current_user(request: Request) -> User:
 
